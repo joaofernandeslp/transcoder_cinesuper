@@ -1,0 +1,42 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build / dist
+dist/
+build/
+
+# Env / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Caches / temp
+temp/
+tmp/
+temp_torrent_cache/
+.cache/
+.DS_Store
+
+# Media / generated / working dirs
+output/
+outputs/
+out/
+hls/
+*.ts
+*.m3u8
+*.mp4
+*.mkv
+*.webm
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.vtt
+
+# If this is a local working folder (looks like it), ignore it:
+weathered-morning-150e/

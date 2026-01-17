@@ -1,0 +1,14 @@
+{
+  "name": "gerador-r2-cinesuper",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "fs-extra": "^11.2.0",
+    "nanoid": "^5.0.7"
+  }
+}

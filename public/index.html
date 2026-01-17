@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>CineSuper Transcoder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { background-color: #0f172a; color: #e2e8f0; }</style>
+</head>
+<body class="p-8 max-w-4xl mx-auto">
+    <div class="mb-8 border-b border-gray-700 pb-4">
+        <h1 class="text-3xl font-bold text-blue-500">🎬 CineSuper Transcoder</h1>
+        <p class="text-gray-400">Versão com Upload de Legendas Externas</p>
+    </div>
+
+    <div class="bg-gray-800 p-6 rounded-lg mb-6 shadow-lg">
+        <h2 class="text-xl font-semibold mb-4 text-white">1. Link do Torrent</h2>
+        <div class="flex gap-2">
+            <input type="text" id="magnetUrl" placeholder="Magnet Link..." class="w-full p-3 bg-gray-900 border border-gray-700 rounded text-white focus:outline-none focus:border-blue-500">
+            <button onclick="checkLink()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded font-bold transition">Verificar</button>
+        </div>
+    </div>
+
+    <div id="metaSection" class="hidden bg-gray-800 p-6 rounded-lg mb-6 shadow-lg">
+        <h2 class="text-xl font-semibold mb-4 text-white">2. Dados do Conteúdo</h2>
+        
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Título Oficial</label>
+                <input type="text" id="title" class="w-full p-2 bg-gray-900 border border-gray-700 rounded">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Gênero</label>
+                <select id="genre" class="w-full p-2 bg-gray-900 border border-gray-700 rounded">
+                    <option>Ação</option><option>Aventura</option><option>Animacao</option><option>Anime</option><option>Brasileiros</option>
+                    <option>Clássicos</option><option>Comédia stand-up</option><option>Comédias</option><option>Curtas</option>
+                    <option>Documentários</option><option>Drama</option><option>Esportes</option><option>Estrangeiros</option>
+                    <option>Fantasia</option><option>Fé e espiritualidade</option><option>Ficção cientifica</option>
+                    <option>Hollywood</option><option>Independentes</option><option>Música e musicais</option>
+                    <option>Policial</option><option>Romance</option><option>Suspense</option><option>Terror</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">Tipo</label>
+            <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="type" value="filme" checked onchange="toggleSeries(false)"> <span>Filme</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="type" value="serie" onchange="toggleSeries(true)"> <span>Série</span>
+                </label>
+            </div>
+        </div>
+
+        <div id="seriesFields" class="hidden grid grid-cols-2 gap-4 mb-4 bg-gray-700 p-4 rounded">
+            <div><label class="block text-sm text-gray-300">Temporada</label><input type="number" id="season" value="1" class="w-full p-2 bg-gray-900 border border-gray-600 rounded"></div>
+            <div><label class="block text-sm text-gray-300">Episódio</label><input type="number" id="episode" value="1" class="w-full p-2 bg-gray-900 border border-gray-600 rounded"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-8 mt-6">
+            <div>
+                <h3 class="text-lg font-semibold mb-2 text-green-400">🔊 Áudios (Internos)</h3>
+                <div id="audioList" class="space-y-2 max-h-40 overflow-y-auto"></div>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold mb-2 text-yellow-400">📝 Legendas (Internas)</h3>
+                <div id="subList" class="space-y-2 max-h-40 overflow-y-auto"></div>
+            </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-gray-700 rounded border border-gray-600">
+            <h3 class="text-lg font-semibold text-white mb-2">📂 Legendas Externas (.srt)</h3>
+            <p class="text-xs text-gray-400 mb-4">Selecione arquivos .srt do seu computador se o torrent não tiver legenda.</p>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm mb-1 text-gray-300">Português (Upload)</label>
+                    <input type="file" id="extSub_pt" accept=".srt,.vtt" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                </div>
+                <div>
+                    <label class="block text-sm mb-1 text-gray-300">Inglês (Upload)</label>
+                    <input type="file" id="extSub_en" accept=".srt,.vtt" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                </div>
+            </div>
+        </div>
+
+        <button onclick="startJob()" class="mt-8 w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded text-lg font-bold shadow-lg transition transform hover:scale-105">🚀 INICIAR CONVERSÃO</button>
+    </div>
+
+    <div id="logArea" class="hidden bg-black p-4 rounded font-mono text-sm text-green-400 h-48 overflow-y-auto border border-gray-800 mt-6">
+        <div id="logContent"></div>
+    </div>
+
+    <script>
+        function toggleSeries(isSeries) { document.getElementById('seriesFields').classList.toggle('hidden', !isSeries); }
+
+        async function checkLink() {
+            const url = document.getElementById('magnetUrl').value;
+            if(!url) return alert("Link vazio!");
+            document.getElementById('logArea').classList.remove('hidden');
+            document.getElementById('logContent').innerHTML = "Verificando link... (Aguarde o Probe)";
+
+            try {
+                const res = await fetch('/api/probe-url', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ url }) });
+                const data = await res.json();
+                
+                if(data.probe) {
+                    renderTracks(data.probe.streams);
+                    document.getElementById('metaSection').classList.remove('hidden');
+                    document.getElementById('logContent').innerHTML += "<br>Link verificado! Preencha os dados.";
+                } else {
+                    alert("Erro ao ler torrent: " + (data.error || 'Desconhecido'));
+                }
+            } catch (e) {
+                alert("Erro de conexão: " + e.message);
+            }
+        }
+
+        function renderTracks(streams) {
+            const al = document.getElementById('audioList'); al.innerHTML = '';
+            const sl = document.getElementById('subList'); sl.innerHTML = '';
+            
+            streams.forEach((s) => {
+                if(s.codec_type === 'audio') {
+                    const lang = s.tags?.language || 'und';
+                    const title = s.tags?.title || `Stream #${s.index}`;
+                    al.innerHTML += `<label class="flex items-center gap-2 cursor-pointer hover:bg-gray-600 p-1 rounded"><input type="checkbox" name="selAudio" value="${s.index}" data-lang="${lang}" data-name="${title}"> <span>${lang.toUpperCase()} - ${title}</span></label>`;
+                }
+                if(s.codec_type === 'subtitle') {
+                    const lang = s.tags?.language || 'und';
+                    const title = s.tags?.title || `Stream #${s.index}`;
+                    sl.innerHTML += `<label class="flex items-center gap-2 cursor-pointer hover:bg-gray-600 p-1 rounded"><input type="checkbox" name="selSub" value="${s.index}" data-lang="${lang}" data-name="${title}"> <span>${lang.toUpperCase()} - ${title}</span></label>`;
+                }
+            });
+            if(sl.innerHTML === '') sl.innerHTML = '<div class="text-gray-500 italic">Nenhuma legenda interna encontrada.</div>';
+        }
+
+        async function startJob() {
+            // --- MUDANÇA PRINCIPAL: USANDO FORMDATA ---
+            const formData = new FormData();
+            
+            // Campos de Texto normais
+            formData.append('url', document.getElementById('magnetUrl').value);
+            
+            const meta = {
+                title: document.getElementById('title').value,
+                genre: document.getElementById('genre').value,
+                type: document.querySelector('input[name="type"]:checked').value,
+                season: document.getElementById('season').value,
+                episode: document.getElementById('episode').value
+            };
+            formData.append('meta', JSON.stringify(meta)); // Envia como string JSON dentro do Form
+
+            // Coleta Áudios
+            const selectedAudios = Array.from(document.querySelectorAll('input[name="selAudio"]:checked')).map(el => ({
+                aIndex: parseInt(el.value), lang: el.dataset.lang, name: el.dataset.name || el.dataset.lang
+            }));
+            formData.append('selectedAudios', JSON.stringify(selectedAudios));
+
+            // Coleta Legendas Internas
+            const selectedSubs = Array.from(document.querySelectorAll('input[name="selSub"]:checked')).map(el => ({
+                sIndex: parseInt(el.value), lang: el.dataset.lang, name: el.dataset.name || el.dataset.lang
+            }));
+            formData.append('selectedSubs', JSON.stringify(selectedSubs));
+
+            // --- ARQUIVOS DE UPLOAD ---
+            const ptFile = document.getElementById('extSub_pt').files[0];
+            if(ptFile) {
+                formData.append('extSub_pt', ptFile); // O nome do campo define a língua no backend
+                console.log("Anexando legenda PT:", ptFile.name);
+            }
+
+            const enFile = document.getElementById('extSub_en').files[0];
+            if(enFile) {
+                formData.append('extSub_en', enFile);
+                console.log("Anexando legenda EN:", enFile.name);
+            }
+
+            if(selectedAudios.length === 0) return alert("Selecione pelo menos 1 áudio!");
+            if(!meta.title) return alert("Digite o título!");
+
+            document.getElementById('logContent').innerHTML = "Enviando comando e arquivos...";
+
+            try {
+                // NOTA: Não defina 'Content-Type': 'application/json' aqui!
+                // O fetch detecta o FormData e configura o multipart/form-data sozinho.
+                const res = await fetch('/api/jobs', { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
+                const data = await res.json();
+                
+                if(data.error) throw new Error(data.error);
+                
+                alert("Job iniciado com sucesso!\nID: " + data.id);
+                document.getElementById('logContent').innerHTML += `<br>Job ID: ${data.id}<br>Destino R2: ${data.target}<br>Acompanhe no terminal.`;
+
+            } catch (e) {
+                alert("Erro ao iniciar job: " + e.message);
+                document.getElementById('logContent').innerHTML += `<br><span class="text-red-500">Erro: ${e.message}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
